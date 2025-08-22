@@ -1,0 +1,5 @@
+{
+  "name": "React IT Quiz App",
+  "description": "An interactive quiz application built with React and TypeScript, designed to test knowledge on various IT topics. Users can answer questions, receive immediate feedback, and see their final score.",
+  "requestFramePermissions": []
+}
