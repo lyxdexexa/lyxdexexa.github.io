@@ -1,16 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
-import StartScreen from './components/StartScreen';
-import QuestionCard from './components/QuestionCard';
-import ResultsScreen from './components/ResultsScreen';
-import ReviewScreen from './components/ReviewScreen';
-import { GameState, QuizQuestion, AnswerRecord } from './types';
+import StartScreen from './components/StartScreen.tsx';
+import QuestionCard from './components/QuestionCard.tsx';
+import ResultsScreen from './components/ResultsScreen.tsx';
+import ReviewScreen from './components/ReviewScreen.tsx';
+import { GameState, QuizQuestion, AnswerRecord } from './types.ts';
+import { quizQuestions } from './data/questions.ts';
 
 const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>('start');
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [rawQuestions, setRawQuestions] = useState<QuizQuestion[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [totalQuestionsFromFile, setTotalQuestionsFromFile] = useState<number>(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -34,30 +33,18 @@ const App: React.FC = () => {
   }, [usedQuestionIds]);
 
   useEffect(() => {
-    fetch('./questions.json')
-      .then(res => {
-        if (!res.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return res.json();
-      })
-      .then((data: QuizQuestion[]) => {
-        setTotalQuestionsFromFile(data.length);
-        // Filter out unsupported question types and questions without options
-        const filteredQuestions = data.filter(q => {
-          if (!q.question || !q.category || !Array.isArray(q.options) || q.options.length === 0) {
-            return false;
-          }
-          const questionText = q.question.toLowerCase();
-          const isUnsupported = questionText.includes('drag') || questionText.includes('drop') || questionText.includes('dropdown') || questionText.includes('selectors');
-          return !isUnsupported;
-        });
-        setRawQuestions(filteredQuestions);
-      })
-      .catch(error => console.error("Error fetching questions:", error))
-      .finally(() => {
-        setIsLoading(false);
-      });
+    const data = quizQuestions;
+    setTotalQuestionsFromFile(data.length);
+    // Filter out unsupported question types and questions without options
+    const filteredQuestions = data.filter(q => {
+      if (!q.question || !q.category || !Array.isArray(q.options) || q.options.length === 0) {
+        return false;
+      }
+      const questionText = q.question.toLowerCase();
+      const isUnsupported = questionText.includes('drag') || questionText.includes('drop') || questionText.includes('dropdown') || questionText.includes('selectors');
+      return !isUnsupported;
+    });
+    setRawQuestions(filteredQuestions);
   }, []);
 
   const handleStartQuiz = (category: string, numQuestions: number, excludePrevious: boolean) => {
@@ -202,7 +189,7 @@ const App: React.FC = () => {
           <StartScreen
             questions={rawQuestions}
             onStart={handleStartQuiz}
-            isLoading={isLoading}
+            isLoading={rawQuestions.length === 0}
             totalQuestionsFromFile={totalQuestionsFromFile}
             usedQuestionCount={usedQuestionIds.length}
             onClearHistory={handleClearHistory}
